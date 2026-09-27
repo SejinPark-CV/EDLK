@@ -24,6 +24,12 @@ To address this, we introduce **Dynamic Logic Kernel (DLK)**, which dynamically 
 
 By turning redundant width into specialized capacity, our approach improves kernel diversity, model utilization, and accuracy with better parameter efficiency.
 
+
+# Pretrained Models
+
+> [!IMPORTANT]
+> **Pretrained models will be released soon.**
+> 
 # Logic Tree Edit Distance
 
 > **Measure structural diversity between learned logic trees.**
@@ -44,7 +50,3 @@ python analyze_logic_ted.py \
 ```
 
 
-# Pretrained Models
-
-> [!IMPORTANT]
-> **Pretrained models will be released soon.**
