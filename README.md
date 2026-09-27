@@ -24,51 +24,25 @@ To address this, we introduce **Dynamic Logic Kernel (DLK)**, which dynamically 
 
 By turning redundant width into specialized capacity, our approach improves kernel diversity, model utilization, and accuracy with better parameter efficiency.
 
-# Logic Tree Diversity Analysis
+# Logic Tree Edit Distance
 
-> **Measure redundancy where it occurs — directly in the learned logic trees.**
+> **Measure structural diversity between learned logic trees.**
 
-We evaluate the structural diversity of learned logic kernels using **Logic Tree Edit Distance (TED)**.
+We compute the minimum Tree Edit Distance (TED) for every pair of logic trees in the target layer.
 
-For every pair of logic trees in the target layer, we compute the **minimum distance** under unordered binary-tree matching. At each node, both the original and left/right-swapped subtree alignments are considered, and the lower-cost alignment is selected recursively.
+- **Mean TED**: average TED across all tree pairs.
+- **Normalized Mean TED**: Mean TED divided by the maximum possible TED.
 
-The substitution cost between two logic gates is defined as the **Hamming distance between their 4-bit Boolean truth tables**, ranging from 0 to 4.
-
-We report:
-
-- **Mean TED** — the average minimum TED over all pairs of logic trees.
-- **Normalized Mean TED** — Mean TED normalized by the maximum possible distance for a tree of depth \(d\):
-
-\[
-\mathrm{Normalized\ Mean\ TED}
-=
-\frac{\mathrm{Mean\ TED}}
-{4(2^d - 1)}
-\]
-
-Higher TED indicates greater structural diversity among learned logic kernels, while lower TED indicates greater kernel redundancy.
-
-## Usage
+Higher values indicate more diverse logic kernels, while lower values indicate greater redundancy.
 
 ```bash
 python analyze_logic_ted.py \
   --resume path/to/checkpoint.pt \
   --architecture <architecture> \
   --dataset <dataset> \
-  --layer conv3 \
-  --channels <channels> \
-  --save
+  --layer conv3
 ```
 
-For dynamic logic layers, all logic trees across the experts are included in the pairwise TED analysis.
-
-The script optionally saves:
-
-```text
-*_matrix.npy    # Pairwise TED matrix
-*_summary.csv   # Mean TED and Normalized Mean TED
-*_trees.csv     # Extracted logic-tree gate IDs
-```
 
 # Comparison with Baselines
 
