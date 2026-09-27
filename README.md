@@ -25,13 +25,21 @@ conda create -n edlk python=3.10
 conda activate edlk
 pip install -r requirements.txt
 pip install -e . --no-build-isolation
+```
 
+For **PyTorch 1.13.0 + CUDA 11.7**:
+
+```bash
+conda create -n edlk python=3.10
+conda activate edlk
+pip install -r requirements_cu117.txt
+pip install -e . --no-build-isolation
+```
 
 ## Pretrained Models
 
 > [!IMPORTANT]
 > **Pretrained models will be released soon.**
-
 
 ## Logic Tree Edit Distance
 
@@ -51,5 +59,3 @@ python analyze_logic_ted.py \
   --dataset <dataset> \
   --layer conv3
 ```
-
-
