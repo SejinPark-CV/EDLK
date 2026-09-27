@@ -37,12 +37,12 @@ pip install -e . --no-build-isolation
 
 For additional installation notes related to `difflogic`, please refer to `INSTALLATION_SUPPORT.md`.
 
-# Pretrained Models
+## Pretrained Models
 
 > [!IMPORTANT]
 > **Pretrained models will be released soon.**
 > 
-# Logic Tree Edit Distance
+## Logic Tree Edit Distance
 
 > **Measure structural diversity between learned logic trees.**
 
