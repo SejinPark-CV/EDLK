@@ -16,25 +16,14 @@ Conference on Neural Information Processing Systems (**NeurIPS 2026**)
 
 ## 🛠️ Environment Setup
 
-Our environment setup follows the configuration used in [LogicIR](https://github.com/SejinPark-CV/LogicIR).
-
-For **PyTorch 2.9.1 + CUDA 12.2**:
+All experiments in this repository were conducted with **PyTorch 2.9.1 + CUDA 12.2**.
 
 ```bash
 conda create -n edlk python=3.10
 conda activate edlk
 pip install -r requirements.txt
 pip install -e . --no-build-isolation
-```
 
-For **PyTorch 1.13.0 + CUDA 11.7**:
-
-```bash
-conda create -n edlk python=3.10
-conda activate edlk
-pip install -r requirements_cu117.txt
-pip install -e . --no-build-isolation
-```
 
 ## Pretrained Models
 
