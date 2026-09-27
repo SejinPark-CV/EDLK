@@ -26,11 +26,13 @@ conda activate edlk
 pip install -r requirements.txt
 pip install -e . --no-build-isolation
 
+
 ## Pretrained Models
 
 > [!IMPORTANT]
 > **Pretrained models will be released soon.**
-> 
+
+
 ## Logic Tree Edit Distance
 
 > **Measure structural diversity between learned logic trees.**
