@@ -16,18 +16,27 @@ Conference on Neural Information Processing Systems (**NeurIPS 2026**)
 
 # Abstract
 
-Differentiable logic gate networks, which operate using only logic gates, have recently attracted attention as an efficient alternative to conventional neural networks. However, despite their efficiency, the scaling behavior of logic gate networks remains underexplored. By contrast, scaling model capacity is a central design principle in deep neural networks and typically leads to improved performance. This discrepancy raises a key question: Can similar scaling benefits also be achieved in logic gate networks? In this work, we focus on width as a primary scaling axis and conduct a systematic analysis of its behavior in logic gate networks. We observe that naive width scaling often introduces redundancy among logic kernels, limiting the effective use of additional kernels and leading to performance saturation. To address this limitation, we propose a dynamic logic kernel framework that reorganizes kernel utilization by promoting specialization across kernel groups. This enables the network to better utilize increased width via input-dependent kernel routing, while ensuring that both routing and computation are implemented entirely with gate-level Boolean operations at inference time. We further find that kernel redundancy is most pronounced at the first gate level, motivating an early-stage dynamic logic kernel strategy that concentrates adaptation at this level. Experimental results demonstrate that our approach improves kernel utilization and increases kernel diversity, leading to higher accuracy with improved parameter efficiency.
+𝗖𝗮𝗻 𝗟𝗼𝗴𝗶𝗰 𝗚𝗮𝘁𝗲 𝗡𝗲𝘁𝘄𝗼𝗿𝗸𝘀 𝘁𝘂𝗿𝗻 𝘄𝗶𝗱𝘁𝗵 𝗶𝗻𝘁𝗼 𝗲𝗳𝗳𝗲𝗰𝘁𝗶𝘃𝗲 𝗰𝗮𝗽𝗮𝗰𝗶𝘁𝘆?
+
+We find that **naively increasing network width does not necessarily translate into effective model capacity**. Instead, additional logic kernels become increasingly redundant, leading to inefficient kernel utilization and performance saturation.
+
+To address this, we introduce **Dynamic Logic Kernel (DLK)**, which dynamically routes each input to specialized kernel groups while keeping inference entirely within the logic-gate domain. Building on our level-wise analysis, we further propose **Early-stage Dynamic Logic Kernel (EDLK)**, which focuses dynamic routing on the first gate level where kernel redundancy is most pronounced.
+
+By turning redundant width into specialized capacity, our approach improves kernel diversity, model utilization, and accuracy with better parameter efficiency.
 
 
 # Performance and Efficiency
 
-For direct comparison, we report both **inference-time parameter counts and Top-1 accuracy**, allowing performance and model efficiency to be compared together.
+> **Compare where it matters — accuracy vs. inference-time parameters.**
+
+We report **Top-1 accuracy together with inference-time parameter counts**, enabling direct comparison of the performance–efficiency trade-off across models.
+
 
 # Code Details
 
-```text
-Updating...
-```
+> [!IMPORTANT]
+> **Code and pretrained models are being prepared for release.**
 
-The code and pretrained models will be released.
-**
+```text
+Coming soon.
+```
