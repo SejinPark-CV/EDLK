@@ -9,7 +9,10 @@ Conference on Neural Information Processing Systems (**NeurIPS 2026**)
   <img src="EDLK.png" width="85%">
 </p>
 
-Our codebase is built upon [LogicIR](https://github.com/jimmy9704/LogicIR).
+## Base Code
+
+> [!NOTE]
+> **This project is built upon [LogicIR](https://github.com/jimmy9704/LogicIR), which serves as the base codebase for our implementation.**  
 
 # Abstract
 
