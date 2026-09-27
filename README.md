@@ -44,17 +44,7 @@ python analyze_logic_ted.py \
 ```
 
 
-# Comparison with Baselines
-
-> **Compare where it matters — accuracy vs. inference-time parameters.**
-
-We report **Top-1 accuracy alongside inference-time parameter counts** for direct comparison with existing logic gate network baselines.
-
-# Code Details
+# Pretrained Models
 
 > [!IMPORTANT]
-> **Code and pretrained models are being prepared for release.**
-
-```text
-Coming soon.
-```
+> **Pretrained models will be released soon.**
