@@ -23,7 +23,7 @@ conda create -n edlk python=3.10
 conda activate edlk
 pip install -r requirements.txt
 pip install -e . --no-build-isolation
-
+```
 
 ## Pretrained Models
 
