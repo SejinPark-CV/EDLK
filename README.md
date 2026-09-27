@@ -25,12 +25,11 @@ To address this, we introduce **Dynamic Logic Kernel (DLK)**, which dynamically 
 By turning redundant width into specialized capacity, our approach improves kernel diversity, model utilization, and accuracy with better parameter efficiency.
 
 
-# Performance and Efficiency
+# Comparison with Baselines
 
 > **Compare where it matters — accuracy vs. inference-time parameters.**
 
-We report **Top-1 accuracy together with inference-time parameter counts**, enabling direct comparison of the performance–efficiency trade-off across models.
-
+We report **Top-1 accuracy alongside inference-time parameter counts** for direct comparison with existing logic gate network baselines.
 
 # Code Details
 
