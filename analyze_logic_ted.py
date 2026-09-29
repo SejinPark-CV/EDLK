@@ -41,15 +41,8 @@ from typing import List, Optional, Tuple
 import numpy as np
 import torch
 
-from difflogic import LogicLayerIWP
-from modelsClassification import (
-    DynamicLogicTreeNet_CIFAR100_13,
-    DynamicLogicTreeNet_CIFAR100_13old,
-    LogicTreeNetS_CIFAR10,
-    LogicTreeNetS_CIFAR100,
-    LogicTreeNetS_CIFAR100IWP,
-)
-
+from difflogic import LogicLayerIWP, LogicLayer
+from model_mnist import MNISTLastDynamicMatchedWidth
 
 # -----------------------------------------------------------------------------
 # Dataset / model helpers
@@ -62,6 +55,7 @@ def input_channels_of_dataset(dataset: str) -> int:
         "cifar-10-31-thresholds": 93,
         "cifar-100-3-thresholds": 9,
         "cifar-100-31-thresholds": 93,
+        "mnist": 1,
     }[dataset]
 
 
@@ -71,6 +65,7 @@ def num_classes_of_dataset(dataset: str) -> int:
         "cifar-10-31-thresholds": 10,
         "cifar-100-3-thresholds": 100,
         "cifar-100-31-thresholds": 100,
+        "mnist": 10,
     }[dataset]
 
 
@@ -83,6 +78,48 @@ def extract_state_dict_from_checkpoint(checkpoint):
 def load_checkpoint_state(path: str, device: str) -> dict:
     checkpoint = torch.load(path, map_location=device)
     return extract_state_dict_from_checkpoint(checkpoint)
+
+
+def load_checkpoint_args(path: str, device: str) -> dict:
+    checkpoint = torch.load(path, map_location=device)
+    if isinstance(checkpoint, dict) and isinstance(checkpoint.get("args"), dict):
+        return checkpoint["args"]
+    return {}
+
+
+def apply_mnist_checkpoint_args(args, checkpoint_args: dict) -> None:
+    """Use the exact MNIST training configuration saved in the checkpoint."""
+    if not checkpoint_args:
+        return
+
+    keys = (
+        "seed",
+        "tau",
+        "grad_factor",
+        "implementation",
+        "connections",
+        "channels",
+        "K",
+        "router_hidden",
+        "router_bits",
+        "tau_router",
+    )
+
+    for key in keys:
+        if key in checkpoint_args:
+            setattr(args, key, checkpoint_args[key])
+
+    print(
+        "[mnist checkpoint args] "
+        f"seed={args.seed}, "
+        f"connections={args.connections}, "
+        f"implementation={args.implementation}, "
+        f"channels={args.channels}, "
+        f"K={args.K}, "
+        f"router_hidden={args.router_hidden}, "
+        f"router_bits={args.router_bits}, "
+        f"tau_router={args.tau_router}"
+    )
 
 
 def detect_dynamic13_variant_from_state(state: dict) -> str:
@@ -129,6 +166,29 @@ def build_model(args, checkpoint_state: Optional[dict] = None) -> torch.nn.Modul
             **common,
             in_dim=in_channels,
             num_classes=num_classes,
+        )
+
+    elif args.architecture == "mnist_edlk":
+        if args.dataset != "mnist":
+            raise ValueError(
+                "architecture='mnist_edlk' requires --dataset mnist."
+            )
+
+        print("[model] MNISTLastDynamicMatchedWidth")
+        model = MNISTLastDynamicMatchedWidth(
+            tau=args.tau,
+            grad_factor=args.grad_factor,
+            device=args.device,
+            implementation=args.implementation,
+            connections=args.connections,
+            channels=args.channels,
+            K=args.K,
+            router_hidden=args.router_hidden,
+            router_bits=args.router_bits,
+            tau_router=args.tau_router,
+            hard_infer=True,
+            in_dim=1,
+            num_classes=10,
         )
 
     elif args.architecture == "dynamic_logic_tree_cifar100_13":
@@ -505,10 +565,16 @@ def seed_everything(seed: int) -> None:
 
 
 def run(args) -> None:
-    seed_everything(args.seed)
-
     if args.device == "cuda" and not torch.cuda.is_available():
         raise RuntimeError("CUDA was requested but is not available.")
+
+    # MNIST EDLK checkpoints store the exact training args. Restore them before
+    # seeding/model construction so random connection topology is reproduced.
+    if args.architecture == "mnist_edlk" and args.resume is not None:
+        checkpoint_args = load_checkpoint_args(args.resume, args.device)
+        apply_mnist_checkpoint_args(args, checkpoint_args)
+
+    seed_everything(args.seed)
 
     checkpoint_state = None
     if args.resume is not None:
@@ -592,6 +658,7 @@ def parse_args() -> argparse.Namespace:
             "logicnet_cifar100old",
             "logicnet_cifar100IWP",
             "dynamic_logic_tree_cifar100_13",
+            "mnist_edlk",
         ],
     )
     parser.add_argument(
@@ -603,6 +670,7 @@ def parse_args() -> argparse.Namespace:
             "cifar-10-31-thresholds",
             "cifar-100-3-thresholds",
             "cifar-100-31-thresholds",
+            "mnist",
         ],
     )
     parser.add_argument(
@@ -631,6 +699,7 @@ def parse_args() -> argparse.Namespace:
     # Dynamic-model options.
     parser.add_argument("--K", type=int, default=4)
     parser.add_argument("--router-hidden", type=int, default=64)
+    parser.add_argument("--router-bits", type=int, default=4)
     parser.add_argument("--tau-router", type=float, default=1.0)
     parser.add_argument("--group-size", type=int, default=8)
     parser.add_argument(
