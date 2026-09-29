@@ -42,9 +42,12 @@ We compute the minimum Tree Edit Distance (TED) for every pair of logic trees in
 Higher values indicate more diverse logic kernels, while lower values indicate greater redundancy.
 
 ```bash
-python analyze_logic_ted.py \
-  --resume path/to/checkpoint.pt \
-  --architecture <architecture> \
-  --dataset <dataset> \
-  --layer conv3
+CUDA_VISIBLE_DEVICES=0 python analyze_logic_ted.py \
+  --architecture mnist_edlk \
+  --dataset mnist \
+  --resume checkpoints/mnist_edlk_25.pt \
+  --layer conv3 \
+  --device cuda \
+  --save \
+  --tag mnist_edlk
 ```
