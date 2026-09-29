@@ -31,3 +31,68 @@ conda create -n edlk python=3.10
 conda activate edlk
 pip install -r requirements.txt
 pip install -e . --no-build-isolation
+```
+
+---
+
+## Pretrained Model
+
+The pretrained MNIST EDLK model is available at:
+
+[Google Drive](https://drive.google.com/file/d/1_i7isdWbUNzN4_l_7B0sFeWD_DsxY7Tp/view?usp=sharing)
+
+Place the downloaded checkpoint in:
+
+```text
+experiments/checkpoints/mnist_edlk_25.pt
+```
+
+---
+
+## 🚀 Training
+
+```bash
+cd experiments
+bash run_mnist.sh
+```
+
+---
+
+## ✅ Inference
+
+After downloading the pretrained model, run:
+
+```bash
+cd experiments
+bash run_infer_mnist.sh
+```
+
+The inference script reports the MNIST test accuracy and routing statistics over the full test set.
+
+---
+
+## Logic Tree Edit Distance
+
+We provide `analyze_logic_ted.py` to measure structural diversity between learned logic trees.
+
+For MNIST EDLK:
+
+```bash
+cd experiments
+
+CUDA_VISIBLE_DEVICES=0 python analyze_logic_ted.py \
+  --architecture mnist_edlk \
+  --dataset mnist \
+  --resume checkpoints/mnist_edlk_25.pt \
+  --layer conv3 \
+  --device cuda \
+  --save \
+  --tag mnist_edlk
+```
+
+The script reports:
+
+- **Mean TED**
+- **Normalized Mean TED**
+
+Higher TED values indicate greater structural diversity among logic kernels.
