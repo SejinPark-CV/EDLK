@@ -41,7 +41,7 @@ from typing import List, Optional, Tuple
 import numpy as np
 import torch
 
-from difflogic import LogicLayerIWP, LogicLayer
+from difflogic import LogicLayerIWP
 from model_mnist import MNISTLastDynamicMatchedWidth
 
 # -----------------------------------------------------------------------------
@@ -53,8 +53,6 @@ def input_channels_of_dataset(dataset: str) -> int:
     return {
         "cifar-10-3-thresholds": 9,
         "cifar-10-31-thresholds": 93,
-        "cifar-100-3-thresholds": 9,
-        "cifar-100-31-thresholds": 93,
         "mnist": 1,
     }[dataset]
 
@@ -63,8 +61,6 @@ def num_classes_of_dataset(dataset: str) -> int:
     return {
         "cifar-10-3-thresholds": 10,
         "cifar-10-31-thresholds": 10,
-        "cifar-100-3-thresholds": 100,
-        "cifar-100-31-thresholds": 100,
         "mnist": 10,
     }[dataset]
 
@@ -122,26 +118,7 @@ def apply_mnist_checkpoint_args(args, checkpoint_args: dict) -> None:
     )
 
 
-def detect_dynamic13_variant_from_state(state: dict) -> str:
-    """Infer whether the checkpoint uses the old or new dynamic-13 layout."""
-    keys = list(state.keys())
-
-    conv1_dynamic = any(k.startswith("conv1.trees.") for k in keys) or any(
-        k.startswith("conv1.router_") for k in keys
-    )
-    conv3_dynamic = any(k.startswith("conv3.trees.") for k in keys)
-
-    if conv1_dynamic:
-        return "old"
-    if conv3_dynamic:
-        return "new"
-    return "unknown"
-
-
-def build_model(args, checkpoint_state: Optional[dict] = None) -> torch.nn.Module:
-    in_channels = input_channels_of_dataset(args.dataset)
-    num_classes = num_classes_of_dataset(args.dataset)
-
+def build_model(args) -> torch.nn.Module:
     common = dict(
         tau=args.tau,
         grad_factor=args.grad_factor,
@@ -152,21 +129,19 @@ def build_model(args, checkpoint_state: Optional[dict] = None) -> torch.nn.Modul
     )
 
     if args.architecture == "logicnet_cifar3t":
+        # Import only when CIFAR-10 analysis is actually requested.
+        # MNIST analysis therefore does not depend on modelsClassification.
+        from modelsClassification import LogicTreeNetS_CIFAR10
+
+        if args.dataset not in {
+            "cifar-10-3-thresholds",
+            "cifar-10-31-thresholds",
+        }:
+            raise ValueError(
+                "architecture='logicnet_cifar3t' requires a CIFAR-10 dataset."
+            )
+
         model = LogicTreeNetS_CIFAR10(**common)
-
-    elif args.architecture in {"logicnet_cifar100", "logicnet_cifar100old"}:
-        model = LogicTreeNetS_CIFAR100(
-            **common,
-            in_dim=in_channels,
-            num_classes=num_classes,
-        )
-
-    elif args.architecture == "logicnet_cifar100IWP":
-        model = LogicTreeNetS_CIFAR100IWP(
-            **common,
-            in_dim=in_channels,
-            num_classes=num_classes,
-        )
 
     elif args.architecture == "mnist_edlk":
         if args.dataset != "mnist":
@@ -190,35 +165,6 @@ def build_model(args, checkpoint_state: Optional[dict] = None) -> torch.nn.Modul
             in_dim=1,
             num_classes=10,
         )
-
-    elif args.architecture == "dynamic_logic_tree_cifar100_13":
-        variant = args.dynamic13_variant
-        if variant == "auto":
-            variant = (
-                detect_dynamic13_variant_from_state(checkpoint_state)
-                if checkpoint_state is not None
-                else "unknown"
-            )
-            if variant == "unknown":
-                variant = "new"
-
-        dynamic_common = dict(
-            **common,
-            K=args.K,
-            router_hidden=args.router_hidden,
-            tau_router=args.tau_router,
-            hard_infer=True,
-            in_dim=in_channels,
-            num_classes=num_classes,
-            group_size=args.group_size,
-        )
-
-        if variant == "old":
-            print("[model] DynamicLogicTreeNet_CIFAR100_13old")
-            model = DynamicLogicTreeNet_CIFAR100_13old(**dynamic_common)
-        else:
-            print("[model] DynamicLogicTreeNet_CIFAR100_13")
-            model = DynamicLogicTreeNet_CIFAR100_13(**dynamic_common)
 
     else:
         raise ValueError(f"Unsupported architecture: {args.architecture}")
@@ -576,20 +522,10 @@ def run(args) -> None:
 
     seed_everything(args.seed)
 
-    checkpoint_state = None
-    if args.resume is not None:
-        if not os.path.exists(args.resume):
-            raise FileNotFoundError(f"Checkpoint not found: {args.resume}")
-        checkpoint_state = load_checkpoint_state(args.resume, args.device)
+    if args.resume is not None and not os.path.exists(args.resume):
+        raise FileNotFoundError(f"Checkpoint not found: {args.resume}")
 
-        if (
-            args.architecture == "dynamic_logic_tree_cifar100_13"
-            and args.dynamic13_variant == "auto"
-        ):
-            detected = detect_dynamic13_variant_from_state(checkpoint_state)
-            print(f"[checkpoint] detected dynamic13 variant: {detected}")
-
-    model = build_model(args, checkpoint_state)
+    model = build_model(args)
 
     if args.resume is not None:
         load_checkpoint(
@@ -654,10 +590,6 @@ def parse_args() -> argparse.Namespace:
         required=True,
         choices=[
             "logicnet_cifar3t",
-            "logicnet_cifar100",
-            "logicnet_cifar100old",
-            "logicnet_cifar100IWP",
-            "dynamic_logic_tree_cifar100_13",
             "mnist_edlk",
         ],
     )
@@ -668,8 +600,6 @@ def parse_args() -> argparse.Namespace:
         choices=[
             "cifar-10-3-thresholds",
             "cifar-10-31-thresholds",
-            "cifar-100-3-thresholds",
-            "cifar-100-31-thresholds",
             "mnist",
         ],
     )
@@ -701,15 +631,6 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--router-hidden", type=int, default=64)
     parser.add_argument("--router-bits", type=int, default=4)
     parser.add_argument("--tau-router", type=float, default=1.0)
-    parser.add_argument("--group-size", type=int, default=8)
-    parser.add_argument(
-        "--dynamic13-variant",
-        type=str,
-        default="auto",
-        choices=["auto", "old", "new"],
-        help='"old"=conv1 dynamic; "new"=conv1 static/conv3 dynamic.',
-    )
-
     parser.add_argument("--device", type=str, default="cuda", choices=["cuda", "cpu"])
     parser.add_argument("--seed", type=int, default=0)
     parser.add_argument(
