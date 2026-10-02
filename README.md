@@ -1,6 +1,6 @@
 # [NeurIPS 2026] Overcoming Kernel Redundancy for Scaling Logic Gate Networks
 
-### Overcoming Kernel Redundancy for Scaling Logic Gate Networks
+### [Overcoming Kernel Redundancy for Scaling Logic Gate Networks](https://arxiv.org/abs/2610.01069)
 
 **Sejin Park**, Hongjae Lee, Changwoo Han, Seung-Won Jung  
 Conference on Neural Information Processing Systems (**NeurIPS 2026**)
